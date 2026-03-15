@@ -27,12 +27,21 @@ def load_data():
 df = load_data()
 
 # Sidebar Filters
+# Sidebar Filters
 st.sidebar.header("Filters")
-start_date = st.sidebar.date_input("Start Date", df["Date"].min())
-end_date = st.sidebar.date_input("End Date", df["Date"].max())
 
-filtered = df[(df["Date"] >= pd.to_datetime(start_date)) & 
-              (df["Date"] <= pd.to_datetime(end_date))]
+# --- City Filter ---
+cities = df["Market Name"].unique()
+selected_city = st.sidebar.selectbox("Select City / Market", cities)
+
+df_city = df[df["Market Name"] == selected_city]
+
+# --- Date Filters ---
+start_date = st.sidebar.date_input("Start Date", df_city["Date"].min())
+end_date = st.sidebar.date_input("End Date", df_city["Date"].max())
+
+filtered = df_city[(df_city["Date"] >= pd.to_datetime(start_date)) &
+                   (df_city["Date"] <= pd.to_datetime(end_date))]
 
 # -----------------------------------
 # KPI Metrics
