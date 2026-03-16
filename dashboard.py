@@ -38,15 +38,20 @@ df = load_data()
 st.sidebar.header("Filters")
 
 # --- City Filter ---
-cities = df["Market Name"].unique()
+if "Market Name" not in df.columns:
+    st.error("❌ 'Market Name' column not found in dataset. Please check your CSV file.")
+    st.stop()
+
+cities = df["Market Name"].dropna().unique()
 selected_city = st.sidebar.selectbox("Select City / Market", cities)
 
 df_city = df[df["Market Name"] == selected_city]
 
 # --- Prevent crash if no valid dates ---
 if df_city["Date"].dropna().empty:
-    st.error("No valid dates found for this city. Please check your data.")
+    st.error("❌ No valid dates found for this city. Please check your data.")
     st.stop()
+
 
 # --- Date Filters ---
 min_date = df_city["Date"].dropna().min().date()
