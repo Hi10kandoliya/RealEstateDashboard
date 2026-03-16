@@ -20,13 +20,21 @@ st.markdown("Dallas–Plano–Irving Market Data Explorer")
 @st.cache_data
 def load_data():
     df = pd.read_csv("TX-Housing-Data.csv")
+
+    # Convert Date column safely
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+
+    # Drop rows with no date at all
+    df = df.dropna(subset=["Date"])
+
     df = df.sort_values("Date")
     return df
 
 df = load_data()
 
+# -----------------------------------
 # Sidebar Filters
+# -----------------------------------
 st.sidebar.header("Filters")
 
 # --- City Filter ---
@@ -35,13 +43,27 @@ selected_city = st.sidebar.selectbox("Select City / Market", cities)
 
 df_city = df[df["Market Name"] == selected_city]
 
+# --- Prevent crash if no valid dates ---
+if df_city["Date"].dropna().empty:
+    st.error("No valid dates found for this city. Please check your data.")
+    st.stop()
+
 # --- Date Filters ---
-start_date = st.sidebar.date_input("Start Date", df_city["Date"].min())
-end_date = st.sidebar.date_input("End Date", df_city["Date"].max())
+min_date = df_city["Date"].dropna().min().date()
+max_date = df_city["Date"].dropna().max().date()
 
-filtered = df_city[(df_city["Date"] >= pd.to_datetime(start_date)) &
-                   (df_city["Date"] <= pd.to_datetime(end_date))]
+start_date = st.sidebar.date_input("Start Date", value=min_date, min_value=min_date, max_value=max_date)
+end_date = st.sidebar.date_input("End Date", value=max_date, min_value=min_date, max_value=max_date)
 
+# Ensure start <= end
+if start_date > end_date:
+    st.sidebar.error("Start date cannot be after end date.")
+    st.stop()
+
+filtered = df_city[
+    (df_city["Date"] >= pd.to_datetime(start_date)) &
+    (df_city["Date"] <= pd.to_datetime(end_date))
+]
 
 # -----------------------------------
 # KPI Metrics
@@ -54,7 +76,7 @@ col3.metric("Median Price", f"${filtered['Median Price'].mean():,.0f}")
 col4.metric("Months Inventory (Avg)", f"{filtered['Months Inventory'].mean():.2f}")
 
 # -----------------------------------
-# Line Charts
+# Sales Over Time
 # -----------------------------------
 st.subheader("📈 Sales Over Time")
 fig, ax = plt.subplots(figsize=(12, 5))
@@ -62,6 +84,9 @@ sns.lineplot(data=filtered, x="Date", y="Sales", ax=ax)
 plt.xticks(rotation=45)
 st.pyplot(fig)
 
+# -----------------------------------
+# Average vs Median Price
+# -----------------------------------
 st.subheader("💵 Average vs Median Price")
 fig, ax = plt.subplots(figsize=(12, 5))
 sns.lineplot(data=filtered, x="Date", y="Average Price", label="Average Price", ax=ax)
@@ -70,7 +95,7 @@ plt.xticks(rotation=45)
 st.pyplot(fig)
 
 # -----------------------------------
-# Inventory Chart
+# Months of Inventory
 # -----------------------------------
 st.subheader("📦 Months of Inventory")
 fig, ax = plt.subplots(figsize=(12, 5))
