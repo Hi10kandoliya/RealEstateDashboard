@@ -38,7 +38,7 @@ df = load_data()
 st.sidebar.header("Filters")
 
 # --- City Filter ---
-if "City" not in df.columns:
+if "Market Name" not in df.columns:
     st.error("❌ 'Market Name' column not found in dataset. Please check your CSV file.")
     st.stop()
 
