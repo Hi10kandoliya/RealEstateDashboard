@@ -53,9 +53,9 @@ if df.empty:
 st.sidebar.header("Filters")
 
 # City Filter - Check if 'City' column exists
-if 'City' in df.columns:
+if 'Market Name' in df.columns:
     # Get unique cities
-    cities = ['All'] + sorted(df['City'].unique().tolist())
+    cities = ['All'] + sorted(df['Market Name'].unique().tolist())
     selected_city = st.sidebar.selectbox("Select City", cities)
 else:
     st.sidebar.warning("City column not found in data")
