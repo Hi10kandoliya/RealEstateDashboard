@@ -17,26 +17,6 @@ st.markdown("Dallas–Plano–Irving Market Data Explorer")
 # -----------------------------------
 # Load Data
 # -----------------------------------
-import streamlit as st
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from datetime import datetime
-
-# -----------------------------------
-# Page Config
-# -----------------------------------
-st.set_page_config(
-    page_title="TX Housing Dashboard",
-    layout="wide"
-)
-
-st.title("🏠 Texas Housing Market Dashboard")
-st.markdown("Dallas–Plano–Irving Market Data Explorer")
-
-# -----------------------------------
-# Load Data
-# -----------------------------------
 @st.cache_data
 def load_data():
     try:
